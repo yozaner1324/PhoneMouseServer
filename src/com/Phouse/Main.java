@@ -2,12 +2,9 @@ package com.Phouse;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URL;
+import java.io.*;
+import java.net.*;
+import java.util.Enumeration;
 
 public class Main
 {
@@ -18,24 +15,34 @@ public class Main
             // get a port
             ServerSocket serverSocket = new ServerSocket(0);
 
-            // get external ip
-            URL checkip = new URL("http://checkip.amazonaws.com");
-            BufferedReader in = new BufferedReader(new InputStreamReader(checkip.openStream()));
-            String ip = in.readLine();
-
             // display connection information
-            System.out.println("IP Address: " + ip);
+            System.out.println("IP Address: " + getCurrentIp());
             System.out.println("Port Number: " + serverSocket.getLocalPort());
 
             Robot robot = new Robot();
+            Socket socket = serverSocket.accept();
 
             // listen for command
             while (true)
             {
-                Socket socket = serverSocket.accept();
-                InputStream input = socket.getInputStream();
+                // get new connection if needed
+                if(socket.isClosed())
+                {
+                    socket = serverSocket.accept();
+                }
 
-                String command = new String(input.readAllBytes());
+                DataInputStream input = new DataInputStream(socket.getInputStream());
+
+                String command = "";
+                try
+                {
+                     command = input.readUTF();
+                }
+                catch(EOFException e)
+                {
+                    socket = serverSocket.accept();
+                    continue;
+                }
 
                 if (!command.isEmpty())
                 {
@@ -72,7 +79,9 @@ public class Main
                     else if (command.contains("test"))
                     {
                         // send OK
-                        socket.getOutputStream().write("OK".getBytes());
+                        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+                        output.writeUTF("ok");
+                        output.flush();
                     }
                     else if (command.contains("scroll"))
                     {
@@ -85,13 +94,37 @@ public class Main
                         }
                     }
                 }
-
-                socket.close();
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+    }
+
+    public static String getCurrentIp()
+    {
+        try
+        {
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements())
+            {
+                NetworkInterface ni = networkInterfaces.nextElement();
+                Enumeration<InetAddress> nias = ni.getInetAddresses();
+                while(nias.hasMoreElements())
+                {
+                    InetAddress ia = nias.nextElement();
+                    if (!ia.isLinkLocalAddress() && !ia.isLoopbackAddress() && ia instanceof Inet4Address)
+                    {
+                        return ia.getHostAddress();
+                    }
+                }
+            }
+        }
+        catch (SocketException e)
+        {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
