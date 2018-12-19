@@ -109,14 +109,14 @@ public class Main
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements())
             {
-                NetworkInterface ni = networkInterfaces.nextElement();
-                Enumeration<InetAddress> nias = ni.getInetAddresses();
-                while(nias.hasMoreElements())
+                NetworkInterface networkInterface = networkInterfaces.nextElement();
+                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                while(addresses.hasMoreElements())
                 {
-                    InetAddress ia = nias.nextElement();
-                    if (!ia.isLinkLocalAddress() && !ia.isLoopbackAddress() && ia instanceof Inet4Address)
+                    InetAddress address = addresses.nextElement();
+                    if (!address.isLinkLocalAddress() && !address.isLoopbackAddress() && address instanceof Inet4Address)
                     {
-                        return ia.getHostAddress();
+                        return address.getHostAddress();
                     }
                 }
             }
