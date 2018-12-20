@@ -69,12 +69,12 @@ public class Main
                     {
                         // right click
                         robot.mousePress(InputEvent.BUTTON3_DOWN_MASK);
-                        robot.keyRelease(InputEvent.BUTTON3_DOWN_MASK);
+                        robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
                     }
                     else if (command.contains("release"))
                     {
                         // release left click
-                        robot.keyRelease(InputEvent.BUTTON1_DOWN_MASK);
+                        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
                     }
                     else if (command.contains("test"))
                     {
