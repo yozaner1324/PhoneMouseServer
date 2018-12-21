@@ -22,6 +22,9 @@ public class Main
             Robot robot = new Robot();
             Socket socket = serverSocket.accept();
 
+            String command = "";
+            DataInputStream input = new DataInputStream(socket.getInputStream());
+
             // listen for command
             while (true)
             {
@@ -29,11 +32,9 @@ public class Main
                 if(socket.isClosed())
                 {
                     socket = serverSocket.accept();
+                    input = new DataInputStream(socket.getInputStream());
                 }
 
-                DataInputStream input = new DataInputStream(socket.getInputStream());
-
-                String command = "";
                 try
                 {
                      command = input.readUTF();
@@ -41,6 +42,7 @@ public class Main
                 catch(EOFException e)
                 {
                     socket = serverSocket.accept();
+                    input = new DataInputStream(socket.getInputStream());
                     continue;
                 }
 
@@ -53,10 +55,9 @@ public class Main
                         String[] parts = command.split(" ");
                         if (parts.length == 3)
                         {
-                            PointerInfo a = MouseInfo.getPointerInfo();
-                            Point b = a.getLocation();
-                            int x = (int) b.getX() + Integer.parseInt(parts[1]);
-                            int y = (int) b.getY() + Integer.parseInt(parts[2]);
+                            Point pointer_location = MouseInfo.getPointerInfo().getLocation();
+                            int x = (int) pointer_location.getX() + Integer.parseInt(parts[1]);
+                            int y = (int) pointer_location.getY() + Integer.parseInt(parts[2]);
                             robot.mouseMove(x, y);
                         }
                     }
@@ -89,8 +90,7 @@ public class Main
                         String[] parts = command.split(" ");
                         if (parts.length == 2)
                         {
-                            int notches = Integer.parseInt(parts[1]);
-                            robot.mouseWheel(notches);
+                            robot.mouseWheel(Integer.parseInt(parts[1]));
                         }
                     }
                 }
@@ -102,7 +102,7 @@ public class Main
         }
     }
 
-    public static String getCurrentIp()
+    private static String getCurrentIp()
     {
         try
         {
